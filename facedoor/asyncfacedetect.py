@@ -145,5 +145,5 @@ if __name__=='__main__':
             x,y,w,h = face_detect.face_rectangle
             face = gray[y:y + h, x:x + w]
             cv2.imwrite(file_output,face)
-            os.remove(file_input)
-            print(face_detect.face_rectangle)
+        os.remove(file_input)
+        print(face_detect.face_rectangle)
