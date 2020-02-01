@@ -5,10 +5,11 @@ import time
 
 class FaceDetect(unittest.TestCase):
   
-  def test_detect(self):
+  def atest_detect(self):
+    # ~ return
     from asyncfacedetect import AsyncFaceDetect
     
-    self.cam = cv2.VideoCapture(-1)
+    self.cam = cv2.VideoCapture(0)
     cam = self.cam
     
 #    im_rgb = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
@@ -21,15 +22,36 @@ class FaceDetect(unittest.TestCase):
     while True:
       s,im = cam.read()
       self.assertTrue(s)
-      self.assertTrue(facedetect.start_detect_if_free(im))
-      while not facedetect.free.is_set():
-        s,im = cam.read()
-        cv2.imwrite('tes.jpg', im)
+      gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+      cv2.imwrite('mem.jpg', gray)
+      if not facedetect.start_detect_if_free('mem.jpg'):
+        print("belum free")
+        continue
       print(facedetect.face_rectangle)
       if (facedetect.face_rectangle!=(0,0,0,0)):
+        cv2.imwrite('found.jpg',facedetect.processed_image)
         break
     
     cv2.imwrite('tes.jpg', im)
+  
+  def test_cam(self):
+
+    cv2.namedWindow("preview")
+    vc = cv2.VideoCapture(0)
+
+    if vc.isOpened(): # try to get the first frame
+        rval, frame = vc.read()
+    else:
+        rval = False
+
+    while rval:
+        cv2.imshow("preview", frame)
+        rval, frame = vc.read()
+        key = cv2.waitKey(20)
+        if key == 27: # exit on ESC
+            break
+    cv2.destroyWindow("preview")
+
     
 if __name__=="__main__":
   fd_test = unittest.main()
