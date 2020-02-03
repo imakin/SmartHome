@@ -134,13 +134,11 @@ if __name__=='__main__':
     from numpysocket import receive_np, send_np
     print('running as service, waiting GRAY image to facedetect using numpysocket.py')
     print('reading input from port 8881')
-    print('result output image face cropped to 127.0.0.1:8882')
+    print('result output ndarray[x,y,w,h] for the coordinate of the face in the input image, send to 127.0.0.1:8882')
     face_detect = AsyncFaceDetect()
     while True:
-        im = receive_np()# already Converted it to grayscale for the faceCascade
+        im = receive_np(port=8881, verbose=True)# already Converted it to grayscale for the faceCascade
         face_detect.start_detect_if_free(im)
         face_detect.run(once=True)
-        if (face_detect.face_rectangle!=(0,0,0,0)):
-            x,y,w,h = face_detect.face_rectangle
-            face = im[y:y + h, x:x + w]
-            send_np(face, port=8882)
+        result = np.ndarray(shape=(4,), dtype=np.uint32, buffer=np.array(face_detect.face_rectangle))
+        send_np(result, port=8882)
