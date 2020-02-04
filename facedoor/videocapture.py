@@ -5,8 +5,8 @@ from libprocess import LibThread
 
 import cv2
 from communication_socket import send_np, AsyncReceiver
-TIMEOUT_DETECT = 4
-TIMEOUT_RECOGNIZE = 10
+TIMEOUT_DETECT = 3
+TIMEOUT_RECOGNIZE = 5
 
 class Requester(LibThread):
     def __init__(self, parent=None):
@@ -40,13 +40,14 @@ class Requester(LibThread):
                 if countstamp!=self.facedetect_receiver.countstamp:
                     # success
                     x,y,w,h = self.facedetect_receiver.current_data.tolist()
-                    face = gray[y:y + h, x:x + w]
-                    # resize to ideal size
-                    face = cv2.resize(face, settings.face_ideal_scale(face))
-                    cv2.imwrite('found.jpg',face)
-                    print(x,y,w,h)
-                    # recognize this face
-                    print(self.recognize(face))
+                    if (w!=0 and h!=0):
+                        face = gray[y:y + h, x:x + w]
+                        # resize to ideal size
+                        face = cv2.resize(face, settings.face_ideal_scale(face))
+                        cv2.imwrite('found.jpg',face)
+                        print(x,y,w,h)
+                        # recognize this face
+                        print(self.recognize(face))
 
                 self.processing.clear()
                 self.free.set()

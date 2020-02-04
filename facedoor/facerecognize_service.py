@@ -31,12 +31,13 @@ while True:
     for lbph_dict in lbph_pool:
         lbph = lbph_dict['lbph']
         label = lbph_dict['label']
-        histogram_distance = lbph.predict(face)
+        label_id,histogram_distance = lbph.predict(face)
+        print(histogram_distance)
         if (histogram_distance<lowest_histogram_distance):
             lowest_histogram_distance = histogram_distance
             lowest_histogram_label = label
     if (lowest_histogram_distance<50):
-        result_str = '{} ({})'.format(lowest_histogram_label, lowest_histogram_distance)
+        result_str = '{} ({})'.format(lowest_histogram_label, int(lowest_histogram_distance))
         print(result_str)
         result = np.ndarray(shape=(len(lowest_histogram_label),), dtype=np.uint32, buffer=np.array([ord(c) for c in result_str]))
         send_np(result, port=settings.socket_port.face_recognize.result)
