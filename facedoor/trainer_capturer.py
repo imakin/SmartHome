@@ -1,3 +1,4 @@
+
 import os
 import settings
 import time
@@ -48,10 +49,14 @@ class Requester(LibThread):
                         face = gray[y:y + h, x:x + w]
                         # resize to ideal size
                         face = cv2.resize(face, settings.face_ideal_scale(face))
-                        cv2.imwrite('found.jpg',face)
+                        # cv2.imwrite('found.jpg',face)
                         print(x,y,w,h)
                         # recognize this face
-                        print(self.recognize(face))
+                        histogram_distance,label = (self.recognize(face))
+                        if histogram_distance>80:
+                            filename = settings.person_jpg_path_format.format(label)+'.jpg'
+                            cv2.imwrite(filename)
+                            print('distance () saved {}'.format(histogram_distance,filename))
 
                 self.processing.clear()
                 self.free.set()
@@ -73,13 +78,19 @@ class Requester(LibThread):
                 break
         if countstamp!=self.facerecognize_receiver.countstamp:
             histogram_distance = self.facerecognize_receiver.current_data[0]
-            result = ''.join([chr(d) for d in self.facerecognize_receiver.current_data.tolist()])
-            return histogram_distance,result
+            label = ''.join([chr(d) for d in self.facerecognize_receiver.current_data.tolist()])
+            return histogram_distance,label
 
 if __name__=='__main__':
+    print('input person name')
+    person = input()
+    oldyaml = settings.person_lbph_path_format.format(person)+'.yaml'
+    print('loading old yaml {}'.format(oldyaml))
+
+
     services = {#start services, they run as daemon
         'face detect': FaceDetectService(),
-        'face recognize': FaceRecognizeService()
+        'face recognize': FaceRecognizeService(maximum_hist_distance=9999999, specific_person_yaml='{}.yaml'.format(person))
     }
 
     cam = cv2.VideoCapture(0)
@@ -90,3 +101,8 @@ if __name__=='__main__':
         s,im = cam.read()
         if requester.free.is_set():
             requester.detect(im)
+
+    print('keyboard interrupt')
+    services['face detect'].stop()
+    services['face recognize'].stop()
+    time.sleep(3)

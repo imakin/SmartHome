@@ -9,14 +9,14 @@ import settings
 from communication_socket import receive_np, send_np
 
 from libprocess import LibProcess
-
+stopped = False
 def main_program():
     print('makin2020\n running as service, waiting GRAY image to facedetect using communication_socket.py')
     print('reading input (ndarray image) from port 8881')
     print('result output ndarray[x,y,w,h] for the coordinate of the face in the input image, send to 127.0.0.1:8882')
     face_cascade_xml = os.path.join(settings.master_path, "xml/lbpcascades/lbpcascade_frontalface_improved.xml")
     face_cascade = cv2.CascadeClassifier(face_cascade_xml)
-    while True:
+    while not stopped:
         im = receive_np(port=settings.socket_port.face_detect.request, verbose=False)# already Converted it to grayscale for the faceCascade
         faces = face_cascade.detectMultiScale(# Find all the faces using the Cascade Classifier
             im,
@@ -41,6 +41,10 @@ class FaceDetectService(LibProcess):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.start()
+
+    def stop(self):
+        global stopped
+        stopped = True
 
     def run(self):
         main_program()
