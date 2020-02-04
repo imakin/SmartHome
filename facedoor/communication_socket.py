@@ -47,8 +47,9 @@ asynchronously listening numpy ndarray and store data to current_data
 using threading.Thread, which means runs in the same interpreter & process as the instantiator. instance.current_data can be accessed from the instantiator
 """
 class AsyncReceiver(Thread):
-    def __init__(self,parent=None, port=8881):
+    def __init__(self,parent=None, port=8881, verbose=False):
         super().__init__(parent)
+        self.verbose = verbose
         self.port = port
         self.daemon = True
         self.current_data = None #the data received can be read here
@@ -57,7 +58,7 @@ class AsyncReceiver(Thread):
     
     def run(self):
         while True:
-            t = receive_np(self.port,verbose=True)
+            t = receive_np(self.port,verbose=self.verbose)
             self.current_data = t
             self.countstamp += 1
             print('received #{}'.format(self.countstamp))
