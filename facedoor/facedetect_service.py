@@ -8,7 +8,9 @@ import settings
 
 from communication_socket import receive_np, send_np
 
-if __name__=='__main__':
+from libprocess import LibProcess
+
+def main_program():
     print('makin2020\n running as service, waiting GRAY image to facedetect using communication_socket.py')
     print('reading input (ndarray image) from port 8881')
     print('result output ndarray[x,y,w,h] for the coordinate of the face in the input image, send to 127.0.0.1:8882')
@@ -33,3 +35,15 @@ if __name__=='__main__':
 #        face_detect.run(once=True)
         result = np.ndarray(shape=(4,), dtype=np.uint32, buffer=np.array(face_rect))
         send_np(result, port=settings.socket_port.face_detect.result)
+
+
+class FaceDetectService(LibProcess):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.start()
+
+    def run(self):
+        main_program()
+
+if __name__=='__main__':
+    main_program()

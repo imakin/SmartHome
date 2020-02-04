@@ -5,6 +5,10 @@ from libprocess import LibThread
 
 import cv2
 from communication_socket import send_np, AsyncReceiver
+
+from facedetect_service import FaceDetectService
+from facerecognize_service import FaceRecognizeService
+
 TIMEOUT_DETECT = 3
 TIMEOUT_RECOGNIZE = 5
 
@@ -72,6 +76,11 @@ class Requester(LibThread):
             return result
 
 if __name__=='__main__':
+    services = {#start services, they run as daemon
+        'face detect': FaceDetectService(),
+        'face recognize': FaceRecognizeService()
+    }
+
     cam = cv2.VideoCapture(0)
     requester = Requester()
     requester.start()
