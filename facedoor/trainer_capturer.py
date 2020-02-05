@@ -56,6 +56,7 @@ class Requester(LibThread):
                         face = gray[y:y + h, x:x + w]
                         # resize to ideal size
                         face = cv2.resize(face, settings.face_ideal_scale(face))
+                        face = cv2.equalizeHist(face)
                         # cv2.imwrite('found.jpg',face)
                         print(x,y,w,h)
                         # recognize this face
