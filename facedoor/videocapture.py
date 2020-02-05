@@ -73,7 +73,7 @@ class Requester(LibThread):
                 break
         if countstamp!=self.facerecognize_receiver.countstamp:
             histogram_distance = self.facerecognize_receiver.current_data[0]
-            result = ''.join([chr(d) for d in self.facerecognize_receiver.current_data.tolist()])
+            result = ''.join([chr(d) for d in self.facerecognize_receiver.current_data.tolist()[1:]])
             return histogram_distance,result
 
 if __name__=='__main__':

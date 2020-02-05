@@ -52,8 +52,8 @@ def main_program(maximum_hist_distance=50, specific_person_yaml=None):
                 lowest_histogram_label = label
         if (lowest_histogram_distance<maximum_hist_distance):
             result_buffer = [int(lowest_histogram_distance)]
-            result_buffer = result_buffer + [ord(c) for c in result_str]
-            result = np.ndarray(shape=(len(result_buffer)+1,), dtype=np.int, buffer=np.array(result_buffer))
+            result_buffer = result_buffer + [ord(c) for c in lowest_histogram_label]
+            result = np.ndarray(shape=(len(result_buffer),), dtype=np.int, buffer=np.array(result_buffer))
             send_np(result, port=settings.socket_port.face_recognize.result)
 
 
@@ -67,7 +67,7 @@ class FaceRecognizeService(LibProcess):
     def stop(self):
         global stopped
         stopped = True
-        
+
     def run(self):
         main_program(maximum_hist_distance=self.maximum_hist_distance, specific_person_yaml=self.specific_person_yaml)
 
