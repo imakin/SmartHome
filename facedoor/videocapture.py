@@ -63,6 +63,7 @@ class Requester(LibThread):
     @param face: grayscale, cropped, and sized face
     """
     def recognize(self,face):
+        face = cv2.equalizeHist(face)
         countstamp = self.facerecognize_receiver.countstamp
         print('requesting recognize')
         send_np(face,port=settings.socket_port.face_recognize.request)
