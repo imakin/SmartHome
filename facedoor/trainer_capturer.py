@@ -66,12 +66,12 @@ class Requester(LibThread):
                             if not lbph_ready:
                                 raise Exception('lbph not ready')
                             label,histogram_distance = lbph.predict(face)
-                            if histogram_distance>30:
-                                filename = settings.person_jpg_path_format.format(self.person_name)+'.jpg'
+                            if histogram_distance>35:
+                                filename = os.path.join(settings.person_jpg_path_format.format(self.person_name),'a'+timestamp()+'.jpg')
                                 cv2.imwrite(filename, face)
                                 print('distance () saved {}'.format(histogram_distance,filename))
                                 images = np.asarray([face])
-                                label = np.zeros(1)
+                                label = np.asarray([1])
                                 lbph.update(images,label)
                             else:
                                 print('distance {}. (not saving)'.format(histogram_distance))
