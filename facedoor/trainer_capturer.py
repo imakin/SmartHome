@@ -4,6 +4,7 @@ import settings
 import time
 from libprocess import LibThread
 
+import numpy as np
 import cv2
 from communication_socket import send_np, AsyncReceiver
 
@@ -13,9 +14,13 @@ from facerecognize_service import FaceRecognizeService
 TIMEOUT_DETECT = 3
 TIMEOUT_RECOGNIZE = 5
 
+def timestamp():
+    return time.strftime("%Y%m%d%H%M%S")
+
 class Requester(LibThread):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, person_name=''):
         super().__init__(parent)
+        self.person_name=person_name
         self.to_process = None
         self.result = None
         self.facedetect_receiver = AsyncReceiver(port=settings.socket_port.face_detect.result) #facedetect_service send face rectangle to this port 8882
@@ -31,6 +36,8 @@ class Requester(LibThread):
         self.processing.set()
 
     def run(self):
+        lbph = cv2.face.LBPHFaceRecognizer_create()
+        lbph_ready = False
         while True:
             if (self.processing.is_set()):
                 # proceed detect image self.to_process
@@ -52,11 +59,31 @@ class Requester(LibThread):
                         # cv2.imwrite('found.jpg',face)
                         print(x,y,w,h)
                         # recognize this face
-                        histogram_distance,label = (self.recognize(face))
-                        if histogram_distance>80:
-                            filename = settings.person_jpg_path_format.format(label)+'.jpg'
-                            cv2.imwrite(filename)
-                            print('distance () saved {}'.format(histogram_distance,filename))
+                        print('ready? ',lbph_ready)
+                        try:
+                            # raise Exception('python 3.4 doesnt work')
+                            if not lbph_ready:
+                                raise Exception('lbph not ready')
+                            label,histogram_distance = lbph.predict(face)
+                            if histogram_distance>40:
+                                filename = settings.person_jpg_path_format.format(self.person_name)+'.jpg'
+                                cv2.imwrite(filename)
+                                print('distance () saved {}'.format(histogram_distance,filename))
+                                images = np.asarray([face])
+                                label = np.zeros(1)
+                                lbph.update(images,label)
+                            else:
+                                print('distance {}. (not saving)'.format(histogram_distance))
+
+                        except:
+                            print('lbph not ready')
+                            filename = os.path.join(settings.person_jpg_path_format.format(self.person_name),'a'+timestamp()+'.jpg')
+                            cv2.imwrite(filename, face)
+
+                            images = np.asarray([face])
+                            label = np.asarray([1])
+                            lbph.update(images,label)
+                            lbph_ready = True
 
                 self.processing.clear()
                 self.free.set()
@@ -90,11 +117,11 @@ if __name__=='__main__':
 
     services = {#start services, they run as daemon
         'face detect': FaceDetectService(),
-        'face recognize': FaceRecognizeService(maximum_hist_distance=9999999, specific_person_yaml='{}.yaml'.format(person))
+        # 'face recognize': FaceRecognizeService(maximum_hist_distance=9999999, specific_person_yaml='{}.yaml'.format(person))
     }
 
     cam = cv2.VideoCapture(0)
-    requester = Requester()
+    requester = Requester(person_name=person)
     requester.start()
 
     while True:
@@ -104,5 +131,5 @@ if __name__=='__main__':
 
     print('keyboard interrupt')
     services['face detect'].stop()
-    services['face recognize'].stop()
+    # services['face recognize'].stop()
     time.sleep(3)
