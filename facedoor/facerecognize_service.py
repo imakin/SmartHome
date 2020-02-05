@@ -21,6 +21,7 @@ def main_program(maximum_hist_distance=50, specific_person_yaml=None):
     lbph_pool = []
     if specific_person_yaml==None:
         for yaml in os.listdir(settings.person_lbph_path):
+            if not yaml.endswith('yaml'):continue
             lbph = cv2.face.LBPHFaceRecognizer_create()
             print('loaded {}'.format(settings.person_lbph_path_format.format(yaml)))
             lbph.read(settings.person_lbph_path_format.format(yaml))

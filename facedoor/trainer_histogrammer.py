@@ -22,5 +22,5 @@ if __name__=='__main__':
     print(labels)
     lbph_object = cv2.face.LBPHFaceRecognizer_create()
     lbph_object.train(images, labels)
-    lbph_object.save(oldyaml)
+    lbph_object.write(oldyaml)
     print('saved to {}'.format(oldyaml))
