@@ -65,7 +65,7 @@ class Requester(LibThread):
                             if not lbph_ready:
                                 raise Exception('lbph not ready')
                             label,histogram_distance = lbph.predict(face)
-                            if histogram_distance>40:
+                            if histogram_distance>30:
                                 filename = settings.person_jpg_path_format.format(self.person_name)+'.jpg'
                                 cv2.imwrite(filename)
                                 print('distance () saved {}'.format(histogram_distance,filename))
