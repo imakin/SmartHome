@@ -12,6 +12,22 @@ from facerecognize_service import FaceRecognizeService
 TIMEOUT_DETECT = 3
 TIMEOUT_RECOGNIZE = 5
 
+"""
+preprocess grayscaled & scaled img before using it as recognition
+"""
+def facePreprocess(img):
+    h,w = img.shape
+    mean = np.mean(img)
+    adjust = int(128 - mean)
+    for y in range(h):
+        for x in range(w):
+            val = img[y][x]
+            val += adjust
+            if val >255:
+                val = 255
+            img[y][x] = val
+    return img
+
 class Requester(LibThread):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -48,6 +64,7 @@ class Requester(LibThread):
                         face = gray[y:y + h, x:x + w]
                         # resize to ideal size
                         face = cv2.resize(face, settings.face_ideal_scale(face))
+                        face = facePreprocess(face)
                         cv2.imwrite('found.jpg',face)
                         print(x,y,w,h)
                         # recognize this face
