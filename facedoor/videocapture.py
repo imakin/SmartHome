@@ -3,6 +3,7 @@ import settings
 import time
 from libprocess import LibThread
 
+import numpy as np
 import cv2
 from communication_socket import send_np, AsyncReceiver
 
